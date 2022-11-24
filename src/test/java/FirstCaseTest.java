@@ -67,10 +67,10 @@ public class FirstCaseTest {
                 "//a[contains(@class ,'menu-desktop__root-title') and text()='Бытовая техника']"))
                 .click();
         logger.info("Перешли в раздел Бытовая техника");
-        WebElement element = driver.findElement(By.xpath(
+        WebElement tHouseholdAppliances = driver.findElement(By.xpath(
                 "//*[@class='subcategory__page-title']"));
-        Assertions.assertTrue(element.getText().equals("Бытовая техника"), "В заголовке не Бытовая техника");
-        Assertions.assertTrue(element.isDisplayed(), "Надпись \"Бытовая техника\" в заголовке не отображена");
+        Assertions.assertEquals("Бытовая техника", tHouseholdAppliances.getText(), "В заголовке не Бытовая техника");
+        Assertions.assertTrue(tHouseholdAppliances.isDisplayed(), "Надпись \"Бытовая техника\" в заголовке не отображена");
         logger.info("Надпись \"Бытовая техника\" в заголовке отображена");
 
         //Перейти по ссылке Техника для кухни, проверить, что отображается текст,...
@@ -78,15 +78,15 @@ public class FirstCaseTest {
                 "//*[text()='Техника для кухни']//ancestor::a[contains(@class ,'ui-link')]"))
                 .click();
         logger.info("Перешли в раздел Техника для кухни");
-        element = driver.findElement(By.xpath("//*[@class='subcategory__page-title']"));
-        Assertions.assertTrue(element.getText().equals("Техника для кухни"), "В заголовке не Техника для кухни");
-        Assertions.assertTrue(element.isDisplayed(), "Надпись \"Техника для кухни\" в заголовке не отображена");
+        WebElement tKitchenAppliances = driver.findElement(By.xpath("//*[@class='subcategory__page-title']"));
+        Assertions.assertEquals("Техника для кухни", tKitchenAppliances.getText(), "В заголовке не Техника для кухни");
+        Assertions.assertTrue(tKitchenAppliances.isDisplayed(), "Надпись \"Техника для кухни\" в заголовке не отображена");
         logger.info("Надпись \"Техника для кухни\" в заголовке отображена");
 
         //... проверить, что отображается ссылка Собрать свою кухню,...
         String xpathConfBtn = "//a[contains(@class ,'configurator-links-block__links-link')]";
-        element = driver.findElement(By.xpath(xpathConfBtn));
-        Assertions.assertTrue(element.isDisplayed(), "ссылка \"Собрать свою кухню\" не отображена");
+        WebElement ConfBtn = driver.findElement(By.xpath(xpathConfBtn));
+        Assertions.assertTrue(ConfBtn.isDisplayed(), "ссылка \"Собрать свою кухню\" не отображена");
         logger.info("Ссылка \"Собрать свою кухню\" отображена");
 
         //... вывести в логи названия категорий, ...
