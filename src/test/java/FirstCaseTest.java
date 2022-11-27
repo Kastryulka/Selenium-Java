@@ -7,6 +7,10 @@ import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.events.EventFiringDecorator;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -15,7 +19,10 @@ import java.util.Map;
 
 public class FirstCaseTest {
     protected static WebDriver driver;
+    WebDiverLogger listener;
     private Logger logger = LogManager.getLogger(FirstCaseTest.class);
+    String outputDir = "temp\\\\FirstCase\\\\";
+
     @BeforeEach
     public void setUp() {
         logger.info("Первый кейс");
@@ -34,43 +41,54 @@ public class FirstCaseTest {
         //TODO конфигурирование prefs из параметров командной строки
 
         driver = WebDriverFactory.getDriver(env.toLowerCase(),loadStrategy.toUpperCase(), parameters.toLowerCase(),prefs);
+
+        listener = new WebDiverLogger(driver);
+        listener.setOutputDir(outputDir);
+
         logger.info("Драйвер стартовал!");
     }
+
     @Test
     public void testFunction(){
-        //driver.manage().timeouts().pageLoadTimeout(Duration.ofMillis(60000));
-        driver.manage().timeouts().implicitlyWait(Duration.ofMillis(50000));
-        driver.get("https://www.dns-shop.ru/");
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(100));
+        WebDriver decoratedDriver = new EventFiringDecorator<>(listener).decorate(driver);
+        Actions actions = new Actions(driver);
+        decoratedDriver.get("https://www.dns-shop.ru/");
         logger.info("Открыта страница DNS - " + "https://www.dns-shop.ru/");
-        logger.info("Заголовок страницы - " + driver.getTitle());
-        logger.info("Текущий URL - " + driver.getCurrentUrl());
-        logger.info(String.format("Ширина окна: %d", driver.manage().window().getSize().getWidth()));
-        logger.info(String.format("Высота окна: %d", driver.manage().window().getSize().getHeight()));
+        logger.info("Заголовок страницы - " + decoratedDriver.getTitle());
+        logger.info("Текущий URL - " + decoratedDriver.getCurrentUrl());
+        logger.info(String.format("Ширина окна: %d", decoratedDriver.manage().window().getSize().getWidth()));
+        logger.info(String.format("Высота окна: %d", decoratedDriver.manage().window().getSize().getHeight()));
+        listener.getScreenshotFull(driver,outputDir,"Начальная страница DNS");
+        actions.scrollToElement(driver.findElement(By.xpath("//*[contains(@class,'city-select__text')]"))).perform();
 
         //если появляется окно выбора города (может скрывать Бытовую технику), нажимаем на кнопку согласия
         String xpathConfirmCityBtn = "//button[contains(@class,'v-confirm-city__btn')]";
         try{
-            driver.findElement(By.xpath(xpathConfirmCityBtn)).click();
+            wait.until(ExpectedConditions.elementToBeClickable(By.xpath(xpathConfirmCityBtn)))
+                    .click();
             logger.info("Согласились с выбором города");
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            WebElement body = driver.findElement(By.xpath(
+                    "//body[1]"));
+            wait.until(ExpectedConditions.stalenessOf(body));
+            logger.info("Страница обновлена");
+            listener.getScreenshotFull(driver,outputDir,"Обновленная начальная страница");
+            actions.scrollToElement(driver.findElement(By.xpath("//*[contains(@class,'city-select__text')]"))).perform();
         }
         catch (Exception e){
             e.printStackTrace();
         }
 
         //Перейти по ссылке Бытовая техника, проверить, что отображается текст
-        driver.findElement(By.xpath(
-                "//a[contains(@class ,'menu-desktop__root-title') and text()='Бытовая техника']"))
+        wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//a[contains(@class ,'menu-desktop__root-title') and text()='Бытовая техника']")))
                 .click();
         logger.info("Перешли в раздел Бытовая техника");
-        WebElement tHouseholdAppliances = driver.findElement(By.xpath(
-                "//*[@class='subcategory__page-title']"));
-        Assertions.assertEquals("Бытовая техника", tHouseholdAppliances.getText(), "В заголовке не Бытовая техника");
-        Assertions.assertTrue(tHouseholdAppliances.isDisplayed(), "Надпись \"Бытовая техника\" в заголовке не отображена");
+        listener.getScreenshotFull(driver,outputDir,"Страница Бытовая техника");
+        WebElement titleHouseholdAppliances = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(
+                "//*[@class='subcategory__page-title']")));
+        Assertions.assertEquals("Бытовая техника", titleHouseholdAppliances.getText(), "В заголовке не Бытовая техника");
+        Assertions.assertTrue(titleHouseholdAppliances.isDisplayed(), "Надпись \"Бытовая техника\" в заголовке не отображена");
         logger.info("Надпись \"Бытовая техника\" в заголовке отображена");
 
         //Перейти по ссылке Техника для кухни, проверить, что отображается текст,...
@@ -78,20 +96,24 @@ public class FirstCaseTest {
                 "//*[text()='Техника для кухни']//ancestor::a[contains(@class ,'ui-link')]"))
                 .click();
         logger.info("Перешли в раздел Техника для кухни");
-        WebElement tKitchenAppliances = driver.findElement(By.xpath("//*[@class='subcategory__page-title']"));
-        Assertions.assertEquals("Техника для кухни", tKitchenAppliances.getText(), "В заголовке не Техника для кухни");
-        Assertions.assertTrue(tKitchenAppliances.isDisplayed(), "Надпись \"Техника для кухни\" в заголовке не отображена");
+        listener.getScreenshotFull(driver,outputDir,"Страница Техника для кухни");
+        WebElement titleKitchenAppliances = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(
+                "//*[@class='subcategory__page-title']")));
+        Assertions.assertEquals("Техника для кухни",
+                titleKitchenAppliances.getText(), "В заголовке не Техника для кухни");
+        Assertions.assertTrue(titleKitchenAppliances.isDisplayed(),
+                "Надпись \"Техника для кухни\" в заголовке не отображена");
         logger.info("Надпись \"Техника для кухни\" в заголовке отображена");
 
         //... проверить, что отображается ссылка Собрать свою кухню,...
         String xpathConfBtn = "//a[contains(@class ,'configurator-links-block__links-link')]";
-        WebElement ConfBtn = driver.findElement(By.xpath(xpathConfBtn));
+        WebElement ConfBtn = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(xpathConfBtn)));
         Assertions.assertTrue(ConfBtn.isDisplayed(), "ссылка \"Собрать свою кухню\" не отображена");
         logger.info("Ссылка \"Собрать свою кухню\" отображена");
 
         //... вывести в логи названия категорий, ...
-        List<WebElement> subcategories = driver.findElements(By.xpath(
-                "//*[@class='subcategory__title']"));
+        List<WebElement> subcategories = wait.until(ExpectedConditions
+                .presenceOfAllElementsLocatedBy(By.xpath("//*[@class='subcategory__title']")));
         logger.info("Количество категорий: " + subcategories.size());
         for(WebElement elem : subcategories){
             logger.info("-" + elem.getText());
