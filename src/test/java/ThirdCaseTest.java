@@ -185,7 +185,7 @@ public class ThirdCaseTest {
         String newWindowTitle = decoratedDriver.getTitle();
         logger.info("Заголовок новой страницы: " + newWindowTitle);
         logger.info("Название продукта в списке: " + firstLaptopText);
-        Assertions.assertTrue(contains(newWindowTitle,firstLaptopText));
+        Assertions.assertTrue(contains(newWindowTitle,firstLaptopText),"заголовок новой страницы не соответствует ожидаемому");
         logger.info("Заголовок страницы соответствует ожидаемому");
         //Сделать скриншот всей страницы (с прокруткой) после загрузки страницы
         listener.getScreenshotFull(driver,outputDir,"Страница выбранного товара");
@@ -195,7 +195,7 @@ public class ThirdCaseTest {
         String characteristicsTitleXpath = "//div[contains(@class,'product-card-description__title')]";
         wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(characteristicsTitleXpath)));
         WebElement characteristicsTitle = decoratedDriver.findElement(By.xpath(characteristicsTitleXpath));
-        Assertions.assertTrue(contains(characteristicsTitle.getText().toUpperCase(),vendorName));
+        Assertions.assertTrue(contains(characteristicsTitle.getText().toUpperCase(),vendorName),"заголовок некорректный: не " + vendorName);
         logger.info("Заголовок в блоке Характеристики корректный: " + vendorName);
 
         //Проверить, что в блоке Характеристики значение Объем оперативной памяти равно 32 ГБ
@@ -210,7 +210,7 @@ public class ThirdCaseTest {
                 "/*[contains(@class,'product-characteristics__spec-value')]";
         WebElement characteristicsRam = decoratedDriver.findElement(By.xpath(characteristicsRamXpath));
         logger.info(characteristicsRam.getText().toUpperCase());
-        Assertions.assertTrue(contains(characteristicsRam.getText().toUpperCase(),ramSize));
+        Assertions.assertTrue(contains(characteristicsRam.getText().toUpperCase(),ramSize), "ОЗУ в характеристиках некорректный: не " + ramSize);
         logger.info("Объем ОЗУ корректный: " + ramSize);
 
         try {
